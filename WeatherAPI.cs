@@ -10,7 +10,7 @@ class WeatherAPI
     private static readonly HttpClient client = new HttpClient(); //Tworzy jedno połączenie HTTP (oszczędza zasoby).
     private const string apiKey = "6bf5480812943946635562298e42df3d"; // Klucz API do uwierzytelnienia w OpenWeatherMap.
 
-    public static async Task<WeatherRecord> GetWeatherAsync(string city)
+    public static async Task<WeatherRecord> GetWeatherAsync(string city)//GetWeatherAsync(city) pobiera dane pogodowe dla podanego miasta.
     {
         using (var db = new WeatherDbContext())
         {
@@ -25,25 +25,25 @@ class WeatherAPI
 
         // Pobranie danych z API
         string url = $"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={apiKey}&units=metric";
-        HttpResponseMessage response = await client.GetAsync(url);
+        HttpResponseMessage response = await client.GetAsync(url);// await- Wysyła asynchroniczne żądanie HTTP (nie blokuje programu).
 
-        if (!response.IsSuccessStatusCode)
+        if (!response.IsSuccessStatusCode)//obsługa błędów API
         {
             throw new Exception($"Błąd API: {response.StatusCode}");
         }
 
-        string jsonResponse = await response.Content.ReadAsStringAsync();
-        Console.WriteLine("Odpowiedź API: " + jsonResponse);
+        string jsonResponse = await response.Content.ReadAsStringAsync();//odczyt json ii deserializacja
+        Console.WriteLine("Odpowiedź API: " + jsonResponse);//Wyświetlam surową odpowiedź było  pomocne w debugowaniu).
 
-        var options = new JsonSerializerOptions
+        var options = new JsonSerializerOptions //ignoruje wielkość liter w nazwach pól json
         {
             PropertyNameCaseInsensitive = true
         };
 
-        WeatherData weather = JsonSerializer.Deserialize<WeatherData>(jsonResponse, options);
+        WeatherData weather = JsonSerializer.Deserialize<WeatherData>(jsonResponse, options);//deserializacja
 
         
-        if (weather == null)
+        if (weather == null)//sprawdzamy czy sie udała deserializacja
         {
             throw new Exception("Błąd: Deserializacja zwróciła null!");
         }
@@ -58,8 +58,14 @@ class WeatherAPI
         {
             throw new Exception("Błąd: Nie udało się pobrać danych pogodowych dla podanego miasta.");
         }
-
-        var weatherRecord = new WeatherRecord
+//  Wyświetlenie danych w terminalu po deserializacji w terminalu
+        Console.WriteLine(" Dane pogodowe:");
+        Console.WriteLine($" Miasto: {weather.Name}");
+        Console.WriteLine($" Temperatura: {weather.main.temp}°C");
+        Console.WriteLine($" Ciśnienie: {weather.main.pressure} hPa");
+        Console.WriteLine($" Wilgotność: {weather.main.humidity}%");
+        
+        var weatherRecord = new WeatherRecord//tworzymy obiekt i wypełniamy danymi z Api
         {
             City = weather.Name, // Upewnij się, że nie jest NULL
             Temperature = weather.main.temp,
@@ -67,10 +73,10 @@ class WeatherAPI
             Humidity = weather.main.humidity
         };
 
-        using (var db = new WeatherDbContext())
+        using (var db = new WeatherDbContext())//tworzymy nowa instancje
         {
-            db.WeatherRecords.Add(weatherRecord);
-            db.SaveChanges();
+            db.WeatherRecords.Add(weatherRecord);//dodajemy rekord do bazy
+            db.SaveChanges();//zapisuje zmiany
         }
 
         return weatherRecord;
