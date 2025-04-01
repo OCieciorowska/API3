@@ -25,13 +25,13 @@ class Program
         try
         {
             dbContext.WeatherRecords.Add(weatherRecord); // Dodanie rekordu do bazy
-            Console.WriteLine("✅ Dodano rekord do bazy danych.");
+            Console.WriteLine(" Dodano rekord do bazy danych.");
             dbContext.SaveChanges(); // Zapisanie zmian
-            Console.WriteLine("✅ Zapisano do bazy!");
+            Console.WriteLine(" Zapisano do bazy");
         }
         catch (Exception ex)
         {
-            Console.WriteLine("❌ Błąd: " + ex.Message);
+            Console.WriteLine(" Błąd: " + ex.Message);
             if (ex.InnerException != null)
             {
                 Console.WriteLine("🔍 Szczegóły: " + ex.InnerException.Message);
