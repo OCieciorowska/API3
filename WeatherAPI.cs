@@ -72,13 +72,33 @@ class WeatherAPI
             Pressure = weather.main.pressure,
             Humidity = weather.main.humidity
         };
-
+/*
         using (var db = new WeatherDbContext())//tworzymy nowa instancje
         {
             db.WeatherRecords.Add(weatherRecord);//dodajemy rekord do bazy
             db.SaveChanges();//zapisuje zmiany
         }
 
+        return weatherRecord;*/
+        try
+        {
+            using (var db = new WeatherDbContext())
+            {
+                db.WeatherRecords.Add(weatherRecord);
+                int result = db.SaveChanges();
+        
+                if (result > 0)
+                    Console.WriteLine("Rekord został dodany do bazy!");
+                else
+                    Console.WriteLine("Nie udało się dodać rekordu!");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Błąd podczas zapisu do bazy: {ex.Message}");
+        }
+
         return weatherRecord;
     }
+
 }
